@@ -300,7 +300,7 @@ CREATE POLICY "Achievements visible to all" ON public.achievements FOR SELECT US
 CREATE POLICY "Admins manage achievements" ON public.achievements FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'));
 
 -- RLS for user_achievements
-CREATE POLICY "Users see own achievements" ON public.user_achievements FOR SELECT USING (auth.uid() = user_id OR true);
+CREATE POLICY "Users see own achievements" ON public.user_achievements FOR SELECT USING (true);
 CREATE POLICY "System inserts achievements" ON public.user_achievements FOR INSERT WITH CHECK (true);
 
 -- RLS for comments
@@ -320,37 +320,33 @@ CREATE POLICY "Authors update own announcements" ON public.announcements FOR UPD
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
-  ref_code TEXT;
   ref_user_id UUID;
   ref_path TEXT;
   ref_level INTEGER;
 BEGIN
-  ref_code := encode(gen_random_bytes(6), 'hex');
-  
   IF NEW.raw_user_meta_data->>'referred_by' IS NOT NULL THEN
     SELECT id, referral_path, generation_level INTO ref_user_id, ref_path, ref_level
     FROM public.profiles
     WHERE referral_code = NEW.raw_user_meta_data->>'referred_by';
     
     IF ref_user_id IS NOT NULL THEN
-      INSERT INTO public.profiles (id, name, email, referral_code, referred_by, leader_id, referral_path, generation_level)
+      INSERT INTO public.profiles (id, name, email, referred_by, leader_id, referral_path, generation_level)
       VALUES (
         NEW.id,
         COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),
         NEW.email,
-        ref_code,
         ref_user_id,
         ref_user_id,
         COALESCE(ref_path, '/') || NEW.id::text || '/',
         COALESCE(ref_level, 0) + 1
       );
     ELSE
-      INSERT INTO public.profiles (id, name, email, referral_code, referral_path, generation_level)
-      VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)), NEW.email, ref_code, '/' || NEW.id::text || '/', 0);
+      INSERT INTO public.profiles (id, name, email, referral_path, generation_level)
+      VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)), NEW.email, '/' || NEW.id::text || '/', 0);
     END IF;
   ELSE
-    INSERT INTO public.profiles (id, name, email, referral_code, referral_path, generation_level)
-    VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)), NEW.email, ref_code, '/' || NEW.id::text || '/', 0);
+    INSERT INTO public.profiles (id, name, email, referral_path, generation_level)
+    VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)), NEW.email, '/' || NEW.id::text || '/', 0);
   END IF;
   
   RETURN NEW;
