@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --navy: #0A2463;
+  --green: #4CAF50;
+  --orange: #FF6D00;
+  --teal: #0F9B8E;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #F8FAFC;
+  color: #1a1a2e;
+}
+
+::selection {
+  background: #0A2463;
+  color: white;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.prose h1, .prose h2, .prose h3 {
+  color: #0A2463;
+  font-weight: 700;
+}
+
+.prose p {
+  color: #374151;
+  line-height: 1.75;
+}
