@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import { getAllLessons } from '@/actions/admin';
 import Link from 'next/link';
 import Badge from '@/components/ui/Badge';
+import DeleteLessonButton from '@/components/admin/DeleteLessonButton';
 
 export const metadata = { title: 'Lessons — Graceway Admin' };
 
@@ -28,6 +29,7 @@ export default async function AdminLessonsPage() {
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Lesson</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Module</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -42,6 +44,9 @@ export default async function AdminLessonsPage() {
                   <Badge variant={lesson.is_published ? 'success' : 'default'}>
                     {lesson.is_published ? 'Published' : 'Draft'}
                   </Badge>
+                </td>
+                <td className="px-4 py-3">
+                  <DeleteLessonButton lessonId={lesson.id} />
                 </td>
               </tr>
             ))}

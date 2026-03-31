@@ -104,16 +104,3 @@ export async function updateProfile(formData) {
   if (error) return { error: error.message };
   return { success: true };
 }
-
-export async function signInWithGoogle() {
-  const supabase = createClient();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback`,
-    },
-  });
-
-  if (error) return { error: error.message };
-  if (data.url) redirect(data.url);
-}
