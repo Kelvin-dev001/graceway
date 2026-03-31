@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { getAllCourses } from '@/actions/admin';
 import Link from 'next/link';
-import { deleteCourse } from '@/actions/courses';
+import DeleteCourseButton from '@/components/admin/DeleteCourseButton';
 import Badge from '@/components/ui/Badge';
 
 export const metadata = { title: 'Manage Courses — Graceway' };
@@ -45,11 +45,7 @@ export default async function AdminCoursesPage() {
                 </td>
                 <td className="px-4 py-3">
                   <Link href={`/admin/courses/${course.id}/edit`} className="text-navy-500 text-sm font-medium hover:underline mr-3">Edit</Link>
-                  <form action={deleteCourse.bind(null, course.id)} className="inline">
-                    <button type="submit" className="text-red-500 text-sm font-medium hover:underline" onClick={(e) => { if (!confirm('Delete this course?')) e.preventDefault(); }}>
-                      Delete
-                    </button>
-                  </form>
+                  <DeleteCourseButton courseId={course.id} />
                 </td>
               </tr>
             ))}
