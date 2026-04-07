@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 
 export async function getLeaderStats() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: null };
 
@@ -28,7 +28,7 @@ export async function getLeaderStats() {
 }
 
 export async function getLeaderStudents() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: [] };
 
@@ -43,7 +43,7 @@ export async function getLeaderStudents() {
 }
 
 export async function getDiscipleshipTree() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: [] };
 

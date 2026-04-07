@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { generateCertificateNumber } from '@/lib/utils';
 
 export async function POST(request) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

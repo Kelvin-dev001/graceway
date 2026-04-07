@@ -7,7 +7,7 @@ import CertificateDownload from '@/features/certificates/CertificateDownload';
 import ShareButton from '@/components/shared/ShareButton';
 
 export default async function CertificateDetailPage({ params }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: certificate } = await supabase
     .from('certificates')

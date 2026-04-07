@@ -5,7 +5,7 @@ import { generateCertificateNumber } from '@/lib/utils';
 import { sendCertificateEmail } from '@/lib/resend';
 
 export async function issueCertificate(courseId, moduleId, certificateType) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
@@ -52,7 +52,7 @@ export async function issueCertificate(courseId, moduleId, certificateType) {
 }
 
 export async function getCertificates() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: [] };
 
@@ -67,7 +67,7 @@ export async function getCertificates() {
 }
 
 export async function getCertificate(certId) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('certificates')
     .select('*, profiles(*), courses(*), modules(*)')

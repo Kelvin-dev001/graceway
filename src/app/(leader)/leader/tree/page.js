@@ -7,7 +7,7 @@ import DiscipleshipTree from '@/components/shared/DiscipleshipTree';
 export const metadata = { title: 'Discipleship Tree — Graceway' };
 
 export default async function LeaderTreePage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 

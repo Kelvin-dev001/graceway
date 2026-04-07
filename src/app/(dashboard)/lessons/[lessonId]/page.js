@@ -7,7 +7,7 @@ import LessonContent from '@/features/learning/LessonContent';
 import ProgressTracker from '@/features/learning/ProgressTracker';
 
 export default async function LessonPage({ params }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 

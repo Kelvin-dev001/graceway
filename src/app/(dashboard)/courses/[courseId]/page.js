@@ -7,7 +7,7 @@ import ModuleList from '@/features/learning/ModuleList';
 import ProgressBar from '@/components/ui/ProgressBar';
 
 export default async function CourseDetailPage({ params }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const { data: course } = await supabase

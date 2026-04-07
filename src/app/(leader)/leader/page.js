@@ -8,7 +8,7 @@ import GenerationStats from '@/features/leader/GenerationStats';
 export const metadata = { title: 'Leader Dashboard — Graceway' };
 
 export default async function LeaderPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 

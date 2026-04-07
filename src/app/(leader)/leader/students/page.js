@@ -7,7 +7,7 @@ import StudentList from '@/features/leader/StudentList';
 export const metadata = { title: 'My Students — Graceway' };
 
 export default async function LeaderStudentsPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 

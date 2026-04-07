@@ -6,7 +6,7 @@ import CourseCard from '@/features/learning/CourseCard';
 export const metadata = { title: 'Courses — Graceway' };
 
 export default async function CoursesPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const { data: courses } = await supabase
