@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 
 export async function getReferralStats() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: null };
 
@@ -32,7 +32,7 @@ export async function getReferralStats() {
 }
 
 export async function validateReferralCode(code) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('profiles')
     .select('id, name, referral_code')

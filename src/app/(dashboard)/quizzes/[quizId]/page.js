@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import QuizEngine from '@/features/quizzes/QuizEngine';
 
 export default async function QuizPage({ params }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 

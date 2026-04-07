@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function getQuiz(quizId) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('quizzes')
     .select('*, questions(*, answers(*))')
@@ -16,7 +16,7 @@ export async function getQuiz(quizId) {
 }
 
 export async function submitQuizAttempt(quizId, answers, startedAt) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
@@ -74,7 +74,7 @@ export async function submitQuizAttempt(quizId, answers, startedAt) {
 }
 
 export async function getQuizAttempts(quizId) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: [] };
 
@@ -90,7 +90,7 @@ export async function getQuizAttempts(quizId) {
 }
 
 export async function createQuiz(formData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const title = formData.get('title');
   const description = formData.get('description');
   const quizType = formData.get('quiz_type') || 'lesson_quiz';
@@ -123,7 +123,7 @@ export async function createQuiz(formData) {
 }
 
 export async function createQuestion(quizId, questionData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { question_text, question_type, points, explanation, answers } = questionData;
 
   const { data: question, error: questionError } = await supabase

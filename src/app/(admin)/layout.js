@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
 export default async function AdminGroupLayout({ children }) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 

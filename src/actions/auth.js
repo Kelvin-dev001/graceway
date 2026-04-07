@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { sendWelcomeEmail } from '@/lib/resend';
 
 export async function signUp(formData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const name = formData.get('name');
   const email = formData.get('email');
   const password = formData.get('password');
@@ -39,7 +39,7 @@ export async function signUp(formData) {
 }
 
 export async function signIn(formData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const email = formData.get('email');
   const password = formData.get('password');
 
@@ -53,13 +53,13 @@ export async function signIn(formData) {
 }
 
 export async function signOut() {
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.auth.signOut();
   redirect('/');
 }
 
 export async function resetPassword(formData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const email = formData.get('email');
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -74,7 +74,7 @@ export async function resetPassword(formData) {
 }
 
 export async function updatePassword(formData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const password = formData.get('password');
 
   const { error } = await supabase.auth.updateUser({ password });
@@ -87,7 +87,7 @@ export async function updatePassword(formData) {
 }
 
 export async function updateProfile(formData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) return { error: 'Not authenticated' };

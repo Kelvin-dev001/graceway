@@ -5,7 +5,7 @@ import { slugify } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 
 export async function getCourses() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('courses')
     .select('*')
@@ -17,7 +17,7 @@ export async function getCourses() {
 }
 
 export async function getCourse(courseId) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('courses')
     .select(`
@@ -38,7 +38,7 @@ export async function getCourse(courseId) {
 }
 
 export async function enrollInCourse(courseId) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
@@ -52,7 +52,7 @@ export async function enrollInCourse(courseId) {
 }
 
 export async function getEnrollments() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: [] };
 
@@ -66,7 +66,7 @@ export async function getEnrollments() {
 }
 
 export async function createCourse(formData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
@@ -88,7 +88,7 @@ export async function createCourse(formData) {
 }
 
 export async function updateCourse(courseId, formData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const title = formData.get('title');
   const description = formData.get('description');
   const slug = formData.get('slug');
@@ -108,7 +108,7 @@ export async function updateCourse(courseId, formData) {
 }
 
 export async function deleteCourse(courseId) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from('courses').delete().eq('id', courseId);
   if (error) return { error: error.message };
   revalidatePath('/admin/courses');

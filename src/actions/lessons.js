@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function getLesson(lessonId) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('lessons')
     .select('*, sections(*), modules(*)')
@@ -16,7 +16,7 @@ export async function getLesson(lessonId) {
 }
 
 export async function markLessonComplete(lessonId) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
@@ -36,7 +36,7 @@ export async function markLessonComplete(lessonId) {
 }
 
 export async function getLessonProgress(lessonId) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { data: null };
 
@@ -52,7 +52,7 @@ export async function getLessonProgress(lessonId) {
 }
 
 export async function createLesson(formData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const title = formData.get('title');
   const slug = formData.get('slug');
   const content = formData.get('content');
@@ -85,7 +85,7 @@ export async function createLesson(formData) {
 }
 
 export async function updateLesson(lessonId, formData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const title = formData.get('title');
   const slug = formData.get('slug');
   const content = formData.get('content');
@@ -116,7 +116,7 @@ export async function updateLesson(lessonId, formData) {
 }
 
 export async function deleteLesson(lessonId) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from('lessons').delete().eq('id', lessonId);
   if (error) return { error: error.message };
   revalidatePath('/admin/lessons');

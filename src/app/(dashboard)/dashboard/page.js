@@ -10,7 +10,7 @@ import ReferralLink from '@/features/referrals/ReferralLink';
 export const metadata = { title: 'Dashboard — Graceway' };
 
 export default async function DashboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 

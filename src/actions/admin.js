@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 
 export async function getAdminStats() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const [
     { count: totalUsers },
@@ -38,7 +38,7 @@ export async function getAdminStats() {
 }
 
 export async function getAllUsers() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
@@ -49,7 +49,7 @@ export async function getAllUsers() {
 }
 
 export async function updateUserRole(userId, role) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from('profiles')
     .update({ role, updated_at: new Date().toISOString() })
@@ -61,7 +61,7 @@ export async function updateUserRole(userId, role) {
 }
 
 export async function getAllCertificates() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('certificates')
     .select('*, profiles(name, email), courses(title), modules(title)')
@@ -72,7 +72,7 @@ export async function getAllCertificates() {
 }
 
 export async function createModule(formData) {
-  const supabase = createClient();
+  const supabase = await createClient();
   const title = formData.get('title');
   const description = formData.get('description');
   const courseId = formData.get('course_id');
@@ -90,7 +90,7 @@ export async function createModule(formData) {
 }
 
 export async function getAllModules() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('modules')
     .select('*, courses(title)')
@@ -101,7 +101,7 @@ export async function getAllModules() {
 }
 
 export async function getAllLessons() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('lessons')
     .select('*, modules(title, courses(title))')
@@ -112,7 +112,7 @@ export async function getAllLessons() {
 }
 
 export async function getAllQuizzes() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('quizzes')
     .select('*, lessons(title), modules(title)')
@@ -123,10 +123,38 @@ export async function getAllQuizzes() {
 }
 
 export async function getAllCourses() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase
     .from('courses')
     .select('*')
+    .order('order_index');
+
+  if (error) return { error: error.message };
+  return { data };
+}
+
+export async function createSection(formData) {
+  const supabase = await createClient();
+  const title = formData.get('title');
+  const description = formData.get('description');
+  const moduleId = formData.get('module_id');
+
+  const { data, error } = await supabase
+    .from('sections')
+    .insert({ title, description, module_id: moduleId })
+    .select()
+    .single();
+
+  if (error) return { error: error.message };
+  revalidatePath('/admin/sections');
+  return { data };
+}
+
+export async function getAllSections() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('sections')
+    .select('*, modules(title, courses(title))')
     .order('order_index');
 
   if (error) return { error: error.message };
