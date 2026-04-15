@@ -1,16 +1,11 @@
-'use client';
+import { getAllLessons, getAllModules } from '@/actions/admin';
+import NewQuizClient from './NewQuizClient';
 
-import { useRouter } from 'next/navigation';
-import QuizForm from '@/features/admin/QuizForm';
+export default async function NewQuizPage() {
+  const [{ data: lessons }, { data: modules }] = await Promise.all([
+    getAllLessons(),
+    getAllModules(),
+  ]);
 
-export default function NewQuizPage() {
-  const router = useRouter();
-  return (
-    <div className="max-w-2xl">
-      <h1 className="text-3xl font-extrabold text-navy-500 mb-8">New Quiz</h1>
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-        <QuizForm onSuccess={() => router.push('/admin/quizzes')} />
-      </div>
-    </div>
-  );
+  return <NewQuizClient lessons={lessons || []} modules={modules || []} />;
 }

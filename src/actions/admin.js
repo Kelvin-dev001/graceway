@@ -89,6 +89,52 @@ export async function createModule(formData) {
   return { data };
 }
 
+export async function getModule(moduleId) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('modules')
+    .select('*')
+    .eq('id', moduleId)
+    .single();
+
+  if (error) return { error: error.message };
+  return { data };
+}
+
+export async function updateModule(moduleId, formData) {
+  const supabase = await createClient();
+  const title = formData.get('title');
+  const description = formData.get('description');
+  const courseId = formData.get('course_id');
+  const isPublished = formData.get('is_published') === 'true';
+
+  const { data, error } = await supabase
+    .from('modules')
+    .update({
+      title,
+      description,
+      course_id: courseId,
+      is_published: isPublished,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', moduleId)
+    .select()
+    .single();
+
+  if (error) return { error: error.message };
+  revalidatePath('/admin/modules');
+  return { data };
+}
+
+export async function deleteModule(moduleId) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('modules').delete().eq('id', moduleId);
+
+  if (error) return { error: error.message };
+  revalidatePath('/admin/modules');
+  return { success: true };
+}
+
 export async function getAllModules() {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -159,4 +205,48 @@ export async function getAllSections() {
 
   if (error) return { error: error.message };
   return { data };
+}
+
+export async function getSection(sectionId) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('sections')
+    .select('*')
+    .eq('id', sectionId)
+    .single();
+
+  if (error) return { error: error.message };
+  return { data };
+}
+
+export async function updateSection(sectionId, formData) {
+  const supabase = await createClient();
+  const title = formData.get('title');
+  const description = formData.get('description');
+  const moduleId = formData.get('module_id');
+
+  const { data, error } = await supabase
+    .from('sections')
+    .update({
+      title,
+      description,
+      module_id: moduleId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', sectionId)
+    .select()
+    .single();
+
+  if (error) return { error: error.message };
+  revalidatePath('/admin/sections');
+  return { data };
+}
+
+export async function deleteSection(sectionId) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('sections').delete().eq('id', sectionId);
+
+  if (error) return { error: error.message };
+  revalidatePath('/admin/sections');
+  return { success: true };
 }

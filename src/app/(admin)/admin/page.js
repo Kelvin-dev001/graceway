@@ -11,6 +11,8 @@ export default async function AdminPage() {
 
   const quickLinks = [
     { href: '/admin/courses/new', label: 'New Course', icon: '📚' },
+    { href: '/admin/modules', label: 'Modules', icon: '📦' },
+    { href: '/admin/sections', label: 'Sections', icon: '🧩' },
     { href: '/admin/lessons/new', label: 'New Lesson', icon: '📝' },
     { href: '/admin/quizzes/new', label: 'New Quiz', icon: '🧪' },
     { href: '/admin/users', label: 'Manage Users', icon: '👥' },

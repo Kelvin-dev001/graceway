@@ -91,6 +91,8 @@ export async function updateLesson(lessonId, formData) {
   const content = formData.get('content');
   const videoUrl = formData.get('video_url');
   const pdfUrl = formData.get('pdf_url');
+  const sectionId = formData.get('section_id');
+  const moduleId = formData.get('module_id');
   const isPublished = formData.get('is_published') === 'true';
   const durationMinutes = parseInt(formData.get('duration_minutes') || '0');
 
@@ -102,6 +104,8 @@ export async function updateLesson(lessonId, formData) {
       content,
       video_url: videoUrl,
       pdf_url: pdfUrl,
+      section_id: sectionId,
+      module_id: moduleId,
       is_published: isPublished,
       duration_minutes: durationMinutes,
       updated_at: new Date().toISOString(),

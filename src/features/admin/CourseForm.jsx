@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { createCourse, updateCourse } from '@/actions/courses';
-import { slugify } from '@/lib/utils';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 

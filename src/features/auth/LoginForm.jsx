@@ -18,9 +18,16 @@ export default function LoginForm() {
     setLoading(true);
     setError('');
     const formData = new FormData(e.target);
-    const result = await signIn(formData);
-    if (result?.error) {
-      setError(result.error);
+    try {
+      const result = await signIn(formData);
+      if (result?.error) {
+        setError(result.error);
+        return;
+      }
+      if (result?.success) {
+        router.push(result.redirectTo || '/dashboard');
+      }
+    } finally {
       setLoading(false);
     }
   }

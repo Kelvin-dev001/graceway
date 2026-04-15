@@ -5,15 +5,17 @@ import { redirect } from 'next/navigation';
 import { enrollInCourse } from '@/actions/courses';
 import ModuleList from '@/features/learning/ModuleList';
 import ProgressBar from '@/components/ui/ProgressBar';
+import { calculateProgress } from '@/lib/progress';
 
 export default async function CourseDetailPage({ params }) {
+  const { courseId } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   const { data: course } = await supabase
     .from('courses')
     .select('*, modules(*, sections(*, lessons(*)))')
-    .eq('id', params.courseId)
+    .eq('id', courseId)
     .single();
 
   if (!course) redirect('/courses');
@@ -26,7 +28,7 @@ export default async function CourseDetailPage({ params }) {
       .from('enrollments')
       .select('*')
       .eq('user_id', user.id)
-      .eq('course_id', params.courseId)
+      .eq('course_id', courseId)
       .single();
     enrollment = enroll;
 
@@ -39,7 +41,9 @@ export default async function CourseDetailPage({ params }) {
   }
 
   const allLessons = course.modules?.flatMap(m => m.sections?.flatMap(s => s.lessons || []) || []) || [];
-  const progressPercent = allLessons.length ? (completedLessons.length / allLessons.length) * 100 : 0;
+  const allLessonIds = new Set(allLessons.map((lesson) => lesson.id));
+  const completedInCourse = completedLessons.filter((lessonId) => allLessonIds.has(lessonId)).length;
+  const progressPercent = calculateProgress(completedInCourse, allLessons.length);
 
   return (
     <div className="max-w-4xl">
@@ -53,7 +57,7 @@ export default async function CourseDetailPage({ params }) {
         {enrollment ? (
           <ProgressBar value={progressPercent} max={100} label="Course Progress" />
         ) : (
-          <form action={enrollInCourse.bind(null, params.courseId)}>
+          <form action={enrollInCourse.bind(null, courseId)}>
             <button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-bold transition-colors">
               Enroll Now — Free
             </button>

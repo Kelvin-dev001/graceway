@@ -30,7 +30,7 @@ const icons = {
 
 export default function Sidebar({ role = 'student' }) {
   const pathname = usePathname();
-  const links = role === 'admin' ? [...NAV_LINKS, ...LEADER_NAV_LINKS, ...ADMIN_NAV_LINKS] : role === 'leader' ? [...NAV_LINKS, ...LEADER_NAV_LINKS] : NAV_LINKS;
+  const links = role === 'admin' ? ADMIN_NAV_LINKS : role === 'leader' ? [...NAV_LINKS, ...LEADER_NAV_LINKS] : NAV_LINKS;
 
   return (
     <aside className="w-64 min-h-screen bg-white border-r border-gray-100 pt-20 px-4 hidden lg:block">
