@@ -207,7 +207,7 @@ export default function QuizForm({ quiz, onSuccess, lessons = [], modules = [], 
                   type="number"
                   min="1"
                   value={question.points}
-                  onChange={(e) => updateQuestion(questionIndex, { points: e.target.value })}
+                  onChange={(e) => updateQuestion(questionIndex, { points: Number(e.target.value || 1) })}
                 />
 
                 {question.answers.map((answer, answerIndex) => (

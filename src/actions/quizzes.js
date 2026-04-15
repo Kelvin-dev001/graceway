@@ -3,6 +3,23 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
+function validateQuizPayload({ title, quizType, passingScore, maxAttempts, timeLimitMinutes, lessonId, moduleId, courseId }) {
+  if (!title) return 'Quiz title is required.';
+  if (Number.isNaN(passingScore) || passingScore < 1 || passingScore > 100) {
+    return 'Passing score must be between 1 and 100.';
+  }
+  if (Number.isNaN(maxAttempts) || maxAttempts < 1 || maxAttempts > 10) {
+    return 'Max attempts must be between 1 and 10.';
+  }
+  if (timeLimitMinutes !== null && (Number.isNaN(timeLimitMinutes) || timeLimitMinutes < 1)) {
+    return 'Time limit must be a positive number.';
+  }
+  if (quizType === 'lesson_quiz' && !lessonId) return 'Please select a lesson for lesson quiz.';
+  if (quizType === 'module_exam' && !moduleId) return 'Please select a module for module exam.';
+  if (quizType === 'course_exam' && !courseId) return 'Please select a course for course exam.';
+  return null;
+}
+
 export async function getQuiz(quizId) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -102,19 +119,17 @@ export async function createQuiz(formData) {
   const courseId = formData.get('course_id') || null;
   const isPublished = formData.get('is_published') === 'true';
 
-  if (!title) return { error: 'Quiz title is required.' };
-  if (Number.isNaN(passingScore) || passingScore < 1 || passingScore > 100) {
-    return { error: 'Passing score must be between 1 and 100.' };
-  }
-  if (Number.isNaN(maxAttempts) || maxAttempts < 1 || maxAttempts > 10) {
-    return { error: 'Max attempts must be between 1 and 10.' };
-  }
-  if (timeLimitMinutes !== null && (Number.isNaN(timeLimitMinutes) || timeLimitMinutes < 1)) {
-    return { error: 'Time limit must be a positive number.' };
-  }
-  if (quizType === 'lesson_quiz' && !lessonId) return { error: 'Please select a lesson for lesson quiz.' };
-  if (quizType === 'module_exam' && !moduleId) return { error: 'Please select a module for module exam.' };
-  if (quizType === 'course_exam' && !courseId) return { error: 'Please select a course for course exam.' };
+  const validationError = validateQuizPayload({
+    title,
+    quizType,
+    passingScore,
+    maxAttempts,
+    timeLimitMinutes,
+    lessonId,
+    moduleId,
+    courseId,
+  });
+  if (validationError) return { error: validationError };
 
   const { data, error } = await supabase
     .from('quizzes')
@@ -178,19 +193,17 @@ export async function updateQuiz(quizId, formData) {
   const courseId = formData.get('course_id') || null;
   const isPublished = formData.get('is_published') === 'true';
 
-  if (!title) return { error: 'Quiz title is required.' };
-  if (Number.isNaN(passingScore) || passingScore < 1 || passingScore > 100) {
-    return { error: 'Passing score must be between 1 and 100.' };
-  }
-  if (Number.isNaN(maxAttempts) || maxAttempts < 1 || maxAttempts > 10) {
-    return { error: 'Max attempts must be between 1 and 10.' };
-  }
-  if (timeLimitMinutes !== null && (Number.isNaN(timeLimitMinutes) || timeLimitMinutes < 1)) {
-    return { error: 'Time limit must be a positive number.' };
-  }
-  if (quizType === 'lesson_quiz' && !lessonId) return { error: 'Please select a lesson for lesson quiz.' };
-  if (quizType === 'module_exam' && !moduleId) return { error: 'Please select a module for module exam.' };
-  if (quizType === 'course_exam' && !courseId) return { error: 'Please select a course for course exam.' };
+  const validationError = validateQuizPayload({
+    title,
+    quizType,
+    passingScore,
+    maxAttempts,
+    timeLimitMinutes,
+    lessonId,
+    moduleId,
+    courseId,
+  });
+  if (validationError) return { error: validationError };
 
   const { data, error } = await supabase
     .from('quizzes')
