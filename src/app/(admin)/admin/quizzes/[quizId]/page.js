@@ -23,7 +23,7 @@ export default async function AdminQuizDetailPage({ params }) {
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
-        <p className="text-sm text-gray-600 mb-2"><span className="font-medium">Type:</span> {quiz.quiz_type.replace('_', ' ')}</p>
+        <p className="text-sm text-gray-600 mb-2"><span className="font-medium">Type:</span> {quiz.quiz_type.replaceAll('_', ' ')}</p>
         <p className="text-sm text-gray-600 mb-2"><span className="font-medium">Passing Score:</span> {quiz.passing_score}%</p>
         <p className="text-sm text-gray-600 mb-2"><span className="font-medium">Max Attempts:</span> {quiz.max_attempts}</p>
         <p className="text-sm text-gray-600 mb-2">

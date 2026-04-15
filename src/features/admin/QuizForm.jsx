@@ -121,45 +121,48 @@ export default function QuizForm({ quiz, onSuccess, lessons = [], modules = [], 
             <option value="course_exam">Course Exam</option>
           </select>
         </div>
-        <div className={quizType === 'lesson_quiz' ? '' : 'hidden'}>
-          <label className="text-sm font-medium text-gray-700 mb-1 block">Lesson</label>
-          <select
-            name="lesson_id"
-            defaultValue={quiz?.lesson_id || ''}
-            required={quizType === 'lesson_quiz'}
-            disabled={quizType !== 'lesson_quiz'}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-navy-500"
-          >
-            <option value="">Select Lesson</option>
-            {lessons.map((lesson) => <option key={lesson.id} value={lesson.id}>{lesson.title}</option>)}
-          </select>
-        </div>
-        <div className={quizType === 'module_exam' ? '' : 'hidden'}>
-          <label className="text-sm font-medium text-gray-700 mb-1 block">Module</label>
-          <select
-            name="module_id"
-            defaultValue={quiz?.module_id || ''}
-            required={quizType === 'module_exam'}
-            disabled={quizType !== 'module_exam'}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-navy-500"
-          >
-            <option value="">Select Module</option>
-            {modules.map((module) => <option key={module.id} value={module.id}>{module.title}</option>)}
-          </select>
-        </div>
-        <div className={quizType === 'course_exam' ? '' : 'hidden'}>
-          <label className="text-sm font-medium text-gray-700 mb-1 block">Course</label>
-          <select
-            name="course_id"
-            defaultValue={quiz?.course_id || ''}
-            required={quizType === 'course_exam'}
-            disabled={quizType !== 'course_exam'}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-navy-500"
-          >
-            <option value="">Select Course</option>
-            {courses.map((course) => <option key={course.id} value={course.id}>{course.title}</option>)}
-          </select>
-        </div>
+        {quizType === 'lesson_quiz' && (
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">Lesson</label>
+            <select
+              name="lesson_id"
+              defaultValue={quiz?.lesson_id || ''}
+              required
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-navy-500"
+            >
+              <option value="">Select Lesson</option>
+              {lessons.map((lesson) => <option key={lesson.id} value={lesson.id}>{lesson.title}</option>)}
+            </select>
+          </div>
+        )}
+        {quizType === 'module_exam' && (
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">Module</label>
+            <select
+              name="module_id"
+              defaultValue={quiz?.module_id || ''}
+              required
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-navy-500"
+            >
+              <option value="">Select Module</option>
+              {modules.map((module) => <option key={module.id} value={module.id}>{module.title}</option>)}
+            </select>
+          </div>
+        )}
+        {quizType === 'course_exam' && (
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-1 block">Course</label>
+            <select
+              name="course_id"
+              defaultValue={quiz?.course_id || ''}
+              required
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-navy-500"
+            >
+              <option value="">Select Course</option>
+              {courses.map((course) => <option key={course.id} value={course.id}>{course.title}</option>)}
+            </select>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-4">
           <Input name="passing_score" label="Passing Score (%)" type="number" defaultValue={quiz?.passing_score || '60'} min="1" max="100" />
           <Input name="max_attempts" label="Max Attempts" type="number" defaultValue={quiz?.max_attempts || '3'} min="1" max="10" />
