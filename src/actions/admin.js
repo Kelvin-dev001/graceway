@@ -23,7 +23,7 @@ export async function getAdminStats() {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
 
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
 
   const [
     { count: totalUsers },
@@ -58,7 +58,7 @@ export async function getAdminStats() {
 export async function getAllUsers() {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
@@ -73,7 +73,7 @@ export async function updateUserRole(userId, role) {
   if (auth.error) return { error: auth.error };
   if (!['student', 'leader', 'admin'].includes(role)) return { error: 'Invalid role.' };
   if (auth.userId === userId && role !== 'admin') return { error: 'Cannot change your own role from admin.' };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { error } = await supabase
     .from('profiles')
     .update({ role, updated_at: new Date().toISOString() })
@@ -87,7 +87,7 @@ export async function updateUserRole(userId, role) {
 export async function getAllCertificates() {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('certificates')
     .select('*, profiles(name, email), courses(title), modules(title)')
@@ -100,7 +100,7 @@ export async function getAllCertificates() {
 export async function createModule(formData) {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const title = formData.get('title')?.toString().trim();
   const description = formData.get('description')?.toString().trim() || null;
   const courseId = formData.get('course_id');
@@ -122,7 +122,7 @@ export async function createModule(formData) {
 export async function getModule(moduleId) {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('modules')
     .select('*')
@@ -136,7 +136,7 @@ export async function getModule(moduleId) {
 export async function updateModule(moduleId, formData) {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const title = formData.get('title')?.toString().trim();
   const description = formData.get('description')?.toString().trim() || null;
   const courseId = formData.get('course_id');
@@ -165,7 +165,7 @@ export async function updateModule(moduleId, formData) {
 export async function deleteModule(moduleId) {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { error } = await supabase.from('modules').delete().eq('id', moduleId);
 
   if (error) return { error: error.message };
@@ -176,7 +176,7 @@ export async function deleteModule(moduleId) {
 export async function getAllModules() {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('modules')
     .select('*, courses(title)')
@@ -189,7 +189,7 @@ export async function getAllModules() {
 export async function getAllLessons() {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('lessons')
     .select('*, modules(title, courses(title))')
@@ -202,7 +202,7 @@ export async function getAllLessons() {
 export async function getAllQuizzes() {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('quizzes')
     .select('*, lessons(title), modules(title), courses(title)')
@@ -215,7 +215,7 @@ export async function getAllQuizzes() {
 export async function getAllCourses() {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('courses')
     .select('*')
@@ -228,7 +228,7 @@ export async function getAllCourses() {
 export async function createSection(formData) {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const title = formData.get('title')?.toString().trim();
   const description = formData.get('description')?.toString().trim() || null;
   const moduleId = formData.get('module_id');
@@ -249,7 +249,7 @@ export async function createSection(formData) {
 export async function getAllSections() {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('sections')
     .select('*, modules(title, courses(title))')
@@ -262,7 +262,7 @@ export async function getAllSections() {
 export async function getSection(sectionId) {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { data, error } = await supabase
     .from('sections')
     .select('*')
@@ -276,7 +276,7 @@ export async function getSection(sectionId) {
 export async function updateSection(sectionId, formData) {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const title = formData.get('title')?.toString().trim();
   const description = formData.get('description')?.toString().trim() || null;
   const moduleId = formData.get('module_id');
@@ -303,7 +303,7 @@ export async function updateSection(sectionId, formData) {
 export async function deleteSection(sectionId) {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { error } = await supabase.from('sections').delete().eq('id', sectionId);
 
   if (error) return { error: error.message };
@@ -314,7 +314,7 @@ export async function deleteSection(sectionId) {
 export async function deleteCertificate(certificateId) {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { error } = await supabase.from('certificates').delete().eq('id', certificateId);
   if (error) return { error: error.message };
   revalidatePath('/admin/certificates');
@@ -326,7 +326,7 @@ export async function deleteUser(userId) {
   if (auth.error) return { error: auth.error };
   if (auth.userId === userId) return { error: 'You cannot delete your own admin account.' };
 
-  const supabase = createAdminClient();
+  const supabase = await createAdminClient();
   const { error } = await supabase.auth.admin.deleteUser(userId);
   if (error) return { error: error.message };
   revalidatePath('/admin/users');
