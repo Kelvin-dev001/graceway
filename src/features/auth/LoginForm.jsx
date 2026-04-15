@@ -7,11 +7,13 @@ import { motion } from 'framer-motion';
 import { signIn } from '@/actions/auth';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import ToastContainer, { useToast } from '@/components/ui/Toast';
 
 export default function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { toasts, toast } = useToast();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -22,9 +24,11 @@ export default function LoginForm() {
       const result = await signIn(formData);
       if (result?.error) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       if (result?.success) {
+        toast.success('Successfully signed in');
         router.push(result.redirectTo || '/dashboard');
       }
     } finally {
@@ -68,6 +72,7 @@ export default function LoginForm() {
           Sign up free
         </Link>
       </p>
+      <ToastContainer toasts={toasts} />
     </motion.div>
   );
 }

@@ -1,15 +1,14 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
-    <footer className="bg-navy-500 text-white py-12 mt-16">
+    <footer className="bg-navy-500 text-white py-10 mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">G</span>
-              </div>
+              <Image src="/logo.png" alt="Graceway logo" width={32} height={32} className="h-8 w-8 object-contain" />
               <span className="font-bold text-lg">Graceway Generation</span>
             </div>
             <p className="text-navy-200 text-sm leading-relaxed">
@@ -27,7 +26,6 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4 text-navy-100">Account</h4>
             <ul className="flex flex-col gap-2 text-sm text-navy-200">
-              <li><Link href="/login" className="hover:text-white transition-colors">Sign In</Link></li>
               <li><Link href="/signup" className="hover:text-white transition-colors">Sign Up</Link></li>
             </ul>
           </div>

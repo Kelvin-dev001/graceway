@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
 import CourseCard from '@/features/learning/CourseCard';
+import { calculateProgress, getCourseProgressMap } from '@/lib/progress';
 
 export const metadata = { title: 'Courses — Graceway' };
 
@@ -16,9 +17,16 @@ export default async function CoursesPage() {
     .order('order_index');
 
   let enrollments = [];
+  let progressByCourse = {};
   if (user) {
     const { data } = await supabase.from('enrollments').select('*').eq('user_id', user.id);
     enrollments = data || [];
+
+    progressByCourse = await getCourseProgressMap({
+      supabase,
+      userId: user.id,
+      courseIds: enrollments.map((enrollment) => enrollment.course_id),
+    });
   }
 
   const enrollmentMap = enrollments.reduce((acc, e) => {
@@ -45,6 +53,10 @@ export default async function CoursesPage() {
               key={course.id}
               course={course}
               enrollment={enrollmentMap[course.id]}
+              progress={calculateProgress(
+                progressByCourse[course.id]?.completedLessons || 0,
+                progressByCourse[course.id]?.totalLessons || 0
+              )}
             />
           ))}
         </div>

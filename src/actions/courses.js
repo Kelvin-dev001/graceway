@@ -70,11 +70,13 @@ export async function createCourse(formData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
-  const title = formData.get('title');
-  const description = formData.get('description');
-  const slug = formData.get('slug') || slugify(title);
-  const thumbnail = formData.get('thumbnail');
+  const title = formData.get('title')?.toString().trim();
+  const description = formData.get('description')?.toString().trim() || null;
+  const slug = formData.get('slug')?.toString().trim() || slugify(title);
+  const thumbnail = formData.get('thumbnail')?.toString().trim() || null;
   const isPublished = formData.get('is_published') === 'true';
+  if (!title) return { error: 'Course title is required.' };
+  if (!slug) return { error: 'Course slug is required.' };
 
   const { data, error } = await supabase
     .from('courses')
@@ -89,11 +91,13 @@ export async function createCourse(formData) {
 
 export async function updateCourse(courseId, formData) {
   const supabase = await createClient();
-  const title = formData.get('title');
-  const description = formData.get('description');
-  const slug = formData.get('slug');
-  const thumbnail = formData.get('thumbnail');
+  const title = formData.get('title')?.toString().trim();
+  const description = formData.get('description')?.toString().trim() || null;
+  const slug = formData.get('slug')?.toString().trim() || slugify(title);
+  const thumbnail = formData.get('thumbnail')?.toString().trim() || null;
   const isPublished = formData.get('is_published') === 'true';
+  if (!title) return { error: 'Course title is required.' };
+  if (!slug) return { error: 'Course slug is required.' };
 
   const { data, error } = await supabase
     .from('courses')
@@ -109,8 +113,12 @@ export async function updateCourse(courseId, formData) {
 
 export async function deleteCourse(courseId) {
   const supabase = await createClient();
+  const { count: moduleCount } = await supabase
+    .from('modules')
+    .select('*', { count: 'exact', head: true })
+    .eq('course_id', courseId);
   const { error } = await supabase.from('courses').delete().eq('id', courseId);
   if (error) return { error: error.message };
   revalidatePath('/admin/courses');
-  return { success: true };
+  return { success: true, message: moduleCount ? `Deleted course and ${moduleCount} dependent module(s).` : 'Deleted course.' };
 }
