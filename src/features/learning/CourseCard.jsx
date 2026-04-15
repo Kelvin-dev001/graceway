@@ -5,8 +5,7 @@ import Link from 'next/link';
 import Badge from '@/components/ui/Badge';
 import ProgressBar from '@/components/ui/ProgressBar';
 
-export default function CourseCard({ course, enrollment }) {
-  const progress = enrollment?.progress_percentage || 0;
+export default function CourseCard({ course, enrollment, progress = 0 }) {
 
   return (
     <motion.div

@@ -33,7 +33,7 @@ export async function middleware(request) {
   const protectedRoutes = ['/dashboard', '/courses', '/lessons', '/quizzes', '/certificates', '/profile'];
   const leaderRoutes = ['/leader'];
   const adminRoutes = ['/admin'];
-  const authRoutes = ['/login', '/signup', '/reset-password'];
+  const authRoutes = ['/login', '/signup'];
   const userPortalRoutes = [...protectedRoutes, ...leaderRoutes];
 
   const pathname = request.nextUrl.pathname;

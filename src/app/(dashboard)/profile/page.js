@@ -10,6 +10,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Avatar from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
+import ToastContainer, { useToast } from '@/components/ui/Toast';
 import { getReferralUrl } from '@/lib/utils';
 
 export default function ProfilePage() {
@@ -21,8 +22,11 @@ export default function ProfilePage() {
   const [studentsLoading, setStudentsLoading] = useState(false);
   const [treeData, setTreeData] = useState([]);
   const [treeLoading, setTreeLoading] = useState(false);
+  const [overviewData, setOverviewData] = useState({ name: '', phone: '', bio: '' });
+  const [isEditingOverview, setIsEditingOverview] = useState(false);
   const searchParams = useSearchParams();
   const supabase = useMemo(() => createClient(), []);
+  const { toasts, toast } = useToast();
   const activeTab = searchParams.get('tab') || 'overview';
 
   async function handleSubmit(e) {
@@ -33,12 +37,29 @@ export default function ProfilePage() {
     const result = await updateProfile(formData);
     if (result?.error) {
       setError(result.error);
+      toast.error(result.error);
     } else {
       setSuccess('Profile updated successfully!');
+      const updated = {
+        name: formData.get('name')?.toString().trim() || '',
+        phone: formData.get('phone')?.toString().trim() || '',
+        bio: formData.get('bio')?.toString().trim() || '',
+      };
+      setOverviewData(updated);
+      setIsEditingOverview(false);
+      toast.success('Profile updated successfully');
       setTimeout(() => setSuccess(''), 3000);
     }
     setSaving(false);
   }
+
+  useEffect(() => {
+    setOverviewData({
+      name: profile?.name || '',
+      phone: profile?.phone || '',
+      bio: profile?.bio || '',
+    });
+  }, [profile?.bio, profile?.name, profile?.phone]);
 
   useEffect(() => {
     async function loadStudents() {
@@ -143,21 +164,44 @@ export default function ProfilePage() {
             </div>
 
             {activeTab === 'overview' && (
-              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <Input name="name" label="Full Name" defaultValue={profile?.name} required />
-                <Input name="phone" label="Phone" defaultValue={profile?.phone} type="tel" />
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-medium text-gray-700">Bio</label>
-                  <textarea
-                    name="bio"
-                    defaultValue={profile?.bio}
-                    placeholder="Tell us about yourself..."
-                    rows={3}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-navy-500 resize-none"
-                  />
-                </div>
-                <Button type="submit" loading={saving}>Save Changes</Button>
-              </form>
+              <div className="flex flex-col gap-4">
+                {isEditingOverview ? (
+                  <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                    <Input name="name" label="Full Name" defaultValue={overviewData.name} required />
+                    <Input name="phone" label="Phone" defaultValue={overviewData.phone} type="tel" />
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-sm font-medium text-gray-700">Bio</label>
+                      <textarea
+                        name="bio"
+                        defaultValue={overviewData.bio}
+                        placeholder="Tell us about yourself..."
+                        rows={3}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-navy-500 resize-none"
+                      />
+                    </div>
+                    <div className="flex gap-3">
+                      <Button type="submit" loading={saving}>Save Changes</Button>
+                      <Button type="button" variant="ghost" onClick={() => setIsEditingOverview(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="rounded-xl border border-gray-100 p-4">
+                    <p className="text-sm text-gray-500 mb-1">Full Name</p>
+                    <p className="font-medium text-gray-800 mb-3">{overviewData.name || '—'}</p>
+                    <p className="text-sm text-gray-500 mb-1">Phone</p>
+                    <p className="font-medium text-gray-800 mb-3">{overviewData.phone || '—'}</p>
+                    <p className="text-sm text-gray-500 mb-1">Bio</p>
+                    <p className="font-medium text-gray-800 whitespace-pre-wrap">{overviewData.bio || '—'}</p>
+                  </div>
+                )}
+                {!isEditingOverview && (
+                  <div>
+                    <Button type="button" onClick={() => setIsEditingOverview(true)}>Edit Profile</Button>
+                  </div>
+                )}
+              </div>
             )}
 
             {activeTab === 'students' && (
@@ -208,6 +252,7 @@ export default function ProfilePage() {
           <p className="text-sm text-gray-500 mt-2">Referral URL: {getReferralUrl(profile.referral_code)}</p>
         </div>
       )}
+      <ToastContainer toasts={toasts} />
     </div>
   );
 }

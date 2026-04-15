@@ -3,14 +3,14 @@
 import { useRouter } from 'next/navigation';
 import QuizForm from '@/features/admin/QuizForm';
 
-export default function NewQuizClient({ lessons = [], modules = [] }) {
+export default function NewQuizClient({ lessons = [], modules = [], courses = [] }) {
   const router = useRouter();
 
   return (
     <div className="max-w-2xl">
       <h1 className="text-3xl font-extrabold text-navy-500 mb-8">New Quiz</h1>
       <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-        <QuizForm lessons={lessons} modules={modules} onSuccess={() => router.push('/admin/quizzes')} />
+        <QuizForm lessons={lessons} modules={modules} courses={courses} onSuccess={() => router.push('/admin/quizzes')} />
       </div>
     </div>
   );

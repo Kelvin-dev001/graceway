@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { enrollInCourse } from '@/actions/courses';
 import ModuleList from '@/features/learning/ModuleList';
 import ProgressBar from '@/components/ui/ProgressBar';
-import { calculateProgress } from '@/lib/progress';
+import { calculateProgress, getCourseProgressMap } from '@/lib/progress';
 
 export default async function CourseDetailPage({ params }) {
   const { courseId } = await params;
@@ -40,10 +40,14 @@ export default async function CourseDetailPage({ params }) {
     completedLessons = (progress || []).map((p) => p.lesson_id);
   }
 
-  const allLessons = course.modules?.flatMap(m => m.sections?.flatMap(s => s.lessons || []) || []) || [];
-  const allLessonIds = new Set(allLessons.map((lesson) => lesson.id));
-  const completedInCourse = completedLessons.filter((lessonId) => allLessonIds.has(lessonId)).length;
-  const progressPercent = calculateProgress(completedInCourse, allLessons.length);
+  const progressByCourse = user
+    ? await getCourseProgressMap({ supabase, userId: user.id, courseIds: [courseId] })
+    : {};
+
+  const progressPercent = calculateProgress(
+    progressByCourse[courseId]?.completedLessons || 0,
+    progressByCourse[courseId]?.totalLessons || 0
+  );
 
   return (
     <div className="max-w-4xl">

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import ProgressBar from '@/components/ui/ProgressBar';
 import Card from '@/components/ui/Card';
 import ReferralLink from '@/features/referrals/ReferralLink';
-import { calculateProgress } from '@/lib/progress';
+import { calculateProgress, getCourseProgressMap } from '@/lib/progress';
 
 export const metadata = { title: 'Dashboard — Graceway' };
 
@@ -26,39 +26,11 @@ export default async function DashboardPage() {
   ]);
 
   const enrolledCourseIds = (enrollments || []).map((enrollment) => enrollment.course_id);
-
-  let progressByCourse = {};
-  if (enrolledCourseIds.length > 0) {
-    const [{ data: modules }, { data: lessons }, { data: lessonProgress }] = await Promise.all([
-      supabase.from('modules').select('id, course_id').in('course_id', enrolledCourseIds),
-      supabase.from('lessons').select('id, module_id'),
-      supabase
-        .from('lesson_progress')
-        .select('lesson_id')
-        .eq('user_id', user.id)
-        .eq('status', 'completed'),
-    ]);
-
-    const moduleToCourse = (modules || []).reduce((acc, module) => {
-      acc[module.id] = module.course_id;
-      return acc;
-    }, {});
-
-    const completedLessonIds = new Set((lessonProgress || []).map((item) => item.lesson_id));
-
-    progressByCourse = (lessons || []).reduce((acc, lesson) => {
-      const courseId = moduleToCourse[lesson.module_id];
-      if (!courseId) return acc;
-      if (!acc[courseId]) {
-        acc[courseId] = { totalLessons: 0, completedLessons: 0 };
-      }
-      acc[courseId].totalLessons += 1;
-      if (completedLessonIds.has(lesson.id)) {
-        acc[courseId].completedLessons += 1;
-      }
-      return acc;
-    }, {});
-  }
+  const progressByCourse = await getCourseProgressMap({
+    supabase,
+    userId: user.id,
+    courseIds: enrolledCourseIds,
+  });
 
   return (
     <div className="flex flex-col gap-8">

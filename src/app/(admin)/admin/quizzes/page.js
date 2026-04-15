@@ -29,6 +29,7 @@ export default async function AdminQuizzesPage() {
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Quiz</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Type</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Pass %</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Associated With</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
             </tr>
@@ -36,15 +37,23 @@ export default async function AdminQuizzesPage() {
           <tbody className="divide-y divide-gray-50">
             {quizzes?.map(quiz => (
               <tr key={quiz.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3 font-medium text-gray-800">{quiz.title}</td>
+                <td className="px-4 py-3 font-medium text-gray-800">
+                  <Link href={`/admin/quizzes/${quiz.id}`} className="hover:underline">
+                    {quiz.title}
+                  </Link>
+                </td>
                 <td className="px-4 py-3 text-sm text-gray-600">{quiz.quiz_type.replace('_', ' ')}</td>
                 <td className="px-4 py-3 text-sm text-gray-600">{quiz.passing_score}%</td>
+                <td className="px-4 py-3 text-sm text-gray-600">
+                  {quiz.courses?.title || quiz.modules?.title || quiz.lessons?.title || '—'}
+                </td>
                 <td className="px-4 py-3">
                   <Badge variant={quiz.is_published ? 'success' : 'default'}>
                     {quiz.is_published ? 'Live' : 'Draft'}
                   </Badge>
                 </td>
                 <td className="px-4 py-3">
+                  <Link href={`/admin/quizzes/${quiz.id}`} className="text-gray-600 text-sm font-medium hover:underline mr-3">View</Link>
                   <Link href={`/admin/quizzes/${quiz.id}/edit`} className="text-navy-500 text-sm font-medium hover:underline mr-3">Edit</Link>
                   <DeleteQuizButton quizId={quiz.id} />
                 </td>

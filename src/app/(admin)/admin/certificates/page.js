@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import { getAllCertificates } from '@/actions/admin';
 import { formatDateShort } from '@/lib/utils';
+import DeleteCertificateButton from '@/components/admin/DeleteCertificateButton';
 
 export const metadata = { title: 'Certificates — Graceway Admin' };
 
@@ -23,6 +24,7 @@ export default async function AdminCertificatesPage() {
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Course/Module</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Type</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Issued</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -35,6 +37,7 @@ export default async function AdminCertificatesPage() {
                 <td className="px-4 py-3 text-sm text-gray-600">{cert.courses?.title || cert.modules?.title}</td>
                 <td className="px-4 py-3 text-sm text-gray-600 capitalize">{cert.certificate_type}</td>
                 <td className="px-4 py-3 text-sm text-gray-400">{formatDateShort(cert.issued_at)}</td>
+                <td className="px-4 py-3"><DeleteCertificateButton certificateId={cert.id} /></td>
               </tr>
             ))}
           </tbody>

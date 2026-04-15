@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { updateUserRole } from '@/actions/admin';
 import Avatar from '@/components/ui/Avatar';
 import Badge from '@/components/ui/Badge';
+import DeleteUserButton from '@/components/admin/DeleteUserButton';
 import { formatDateShort } from '@/lib/utils';
 
 export default function UserManagement({ users: initialUsers = [] }) {
@@ -51,16 +52,19 @@ export default function UserManagement({ users: initialUsers = [] }) {
               <td className="px-4 py-3 text-sm text-gray-600">Gen {user.generation_level}</td>
               <td className="px-4 py-3 text-sm text-gray-400">{formatDateShort(user.created_at)}</td>
               <td className="px-4 py-3">
-                <select
-                  value={user.role}
-                  disabled={updating === user.id}
-                  onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                  className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-navy-500"
-                >
-                  <option value="student">Student</option>
-                  <option value="leader">Leader</option>
-                  <option value="admin">Admin</option>
-                </select>
+                <div className="flex items-center gap-3">
+                  <select
+                    value={user.role}
+                    disabled={updating === user.id}
+                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
+                    className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-navy-500"
+                  >
+                    <option value="student">Student</option>
+                    <option value="leader">Leader</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                  <DeleteUserButton userId={user.id} />
+                </div>
               </td>
             </tr>
           ))}
