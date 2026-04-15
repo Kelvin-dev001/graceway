@@ -29,7 +29,7 @@ export default async function AdminQuizzesPage() {
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Quiz</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Type</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Pass %</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Parent</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Associated With</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
             </tr>

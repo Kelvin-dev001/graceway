@@ -126,7 +126,7 @@ export default function ResetPasswordForm() {
       )}
 
       {recovering ? (
-        <div className="text-sm text-gray-500">Preparing secure reset session...</div>
+        <div className="text-sm text-gray-500">Verifying reset link...</div>
       ) : success ? (
         <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl">
           <p className="font-medium">{mode === 'update' ? 'Success!' : 'Email sent!'}</p>

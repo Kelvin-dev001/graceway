@@ -169,7 +169,7 @@ export default function QuizForm({ quiz, onSuccess, lessons = [], modules = [], 
           <input type="checkbox" name="is_published" value="true" defaultChecked={quiz?.is_published} id="quiz_published" className="w-4 h-4 rounded" />
           <label htmlFor="quiz_published" className="text-sm font-medium text-gray-700">Published</label>
         </div>
-        <Button type="submit" loading={loading} className="w-full">{quiz ? 'Save Quiz Settings' : 'Create Quiz'}</Button>
+        <Button type="submit" loading={loading} className="w-full">{quiz ? 'Update Quiz Settings' : 'Create Quiz'}</Button>
       </form>
 
       {quizCreated && (

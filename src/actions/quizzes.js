@@ -14,9 +14,9 @@ function validateQuizPayload({ title, quizType, passingScore, maxAttempts, timeL
   if (timeLimitMinutes !== null && (Number.isNaN(timeLimitMinutes) || timeLimitMinutes < 1)) {
     return 'Time limit must be a positive number.';
   }
-  if (quizType === 'lesson_quiz' && !lessonId) return 'Please select a lesson for lesson quiz.';
-  if (quizType === 'module_exam' && !moduleId) return 'Please select a module for module exam.';
-  if (quizType === 'course_exam' && !courseId) return 'Please select a course for course exam.';
+  if (quizType === 'lesson_quiz' && !lessonId) return 'Please select a lesson.';
+  if (quizType === 'module_exam' && !moduleId) return 'Please select a module.';
+  if (quizType === 'course_exam' && !courseId) return 'Please select a course.';
   return null;
 }
 

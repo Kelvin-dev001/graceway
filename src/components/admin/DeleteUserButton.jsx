@@ -10,7 +10,7 @@ export default function DeleteUserButton({ userId }) {
   const router = useRouter();
 
   async function handleDelete() {
-    if (!confirm('Delete this user? This will remove related records.')) return;
+    if (!confirm('Delete this user? This will remove their profile, enrollments, lesson progress, and quiz attempts.')) return;
     setLoading(true);
     setError('');
     const result = await deleteUser(userId);

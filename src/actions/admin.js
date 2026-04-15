@@ -72,7 +72,7 @@ export async function updateUserRole(userId, role) {
   const auth = await ensureAdmin();
   if (auth.error) return { error: auth.error };
   if (!['student', 'leader', 'admin'].includes(role)) return { error: 'Invalid role.' };
-  if (auth.userId === userId && role !== 'admin') return { error: 'You cannot demote your own admin account.' };
+  if (auth.userId === userId && role !== 'admin') return { error: 'Cannot change your own role from admin.' };
   const supabase = createAdminClient();
   const { error } = await supabase
     .from('profiles')
