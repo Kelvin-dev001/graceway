@@ -22,37 +22,44 @@ export default async function AdminLessonsPage() {
         </Link>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-100">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Lesson</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Module</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {lessons?.map(lesson => (
-              <tr key={lesson.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3">
-                  <div className="font-medium text-gray-800">{lesson.title}</div>
-                  {lesson.duration_minutes > 0 && <div className="text-xs text-gray-400">{lesson.duration_minutes}m</div>}
-                </td>
-                <td className="px-4 py-3 text-sm text-gray-600">{lesson.modules?.title}</td>
-                <td className="px-4 py-3">
-                  <Badge variant={lesson.is_published ? 'success' : 'default'}>
-                    {lesson.is_published ? 'Published' : 'Draft'}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3">
-                  <DeleteLessonButton lessonId={lesson.id} />
-                </td>
+      {!lessons?.length ? (
+        <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center text-gray-500 mt-6">
+          No lessons yet. Create your first lesson.
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Lesson</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Module</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {lessons.map(lesson => (
+                <tr key={lesson.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-gray-800">{lesson.title}</div>
+                    {lesson.duration_minutes > 0 && <div className="text-xs text-gray-400">{lesson.duration_minutes}m</div>}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{lesson.modules?.title}</td>
+                  <td className="px-4 py-3">
+                    <Badge variant={lesson.is_published ? 'success' : 'default'}>
+                      {lesson.is_published ? 'Published' : 'Draft'}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Link href={`/admin/lessons/${lesson.id}/edit`} className="text-navy-500 text-sm font-medium hover:underline mr-3">Edit</Link>
+                    <DeleteLessonButton lessonId={lesson.id} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

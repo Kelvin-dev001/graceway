@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/actions/auth';
@@ -10,15 +12,23 @@ import { useState } from 'react';
 export default function Navbar() {
   const { user, profile, loading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
+
+  async function handleSignOut() {
+    const role = profile?.role;
+    const result = await signOut();
+    if (!result?.error) {
+      router.push(role === 'admin' ? '/login' : '/');
+      router.refresh();
+    }
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-navy-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">G</span>
-            </div>
+            <Image src="/logo.png" alt="Graceway logo" width={32} height={32} className="h-8 w-8 object-contain" />
             <span className="font-bold text-navy-500 text-lg hidden sm:block">Graceway</span>
           </Link>
 
@@ -37,18 +47,11 @@ export default function Navbar() {
                   <Link href="/profile">
                     <Avatar src={profile?.profile_photo} name={profile?.name} size="sm" />
                   </Link>
-                  <form action={signOut}>
-                    <button type="submit" className="text-sm text-gray-500 hover:text-red-500 transition-colors">Sign out</button>
-                  </form>
+                  <button type="button" onClick={handleSignOut} className="text-sm text-gray-500 hover:text-red-500 transition-colors">Sign Out</button>
                 </div>
               </>
             ) : (
-              <>
-                <Link href="/login" className="text-gray-600 hover:text-navy-500 font-medium transition-colors">Sign In</Link>
-                <Link href="/signup" className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl font-semibold transition-colors">
-                  Get Started
-                </Link>
-              </>
+              <Link href="/login" className="text-gray-600 hover:text-navy-500 font-medium transition-colors">Sign In</Link>
             )}
           </div>
 
@@ -70,15 +73,10 @@ export default function Navbar() {
                 <Link href="/dashboard" className="text-gray-600 hover:text-navy-500 font-medium px-2 py-1">Dashboard</Link>
                 <Link href="/courses" className="text-gray-600 hover:text-navy-500 font-medium px-2 py-1">Courses</Link>
                 <Link href="/profile" className="text-gray-600 hover:text-navy-500 font-medium px-2 py-1">Profile</Link>
-                <form action={signOut}>
-                  <button type="submit" className="text-red-500 font-medium px-2 py-1">Sign out</button>
-                </form>
+                <button type="button" onClick={handleSignOut} className="text-red-500 font-medium px-2 py-1 text-left">Sign Out</button>
               </>
             ) : (
-              <>
-                <Link href="/login" className="text-gray-600 font-medium px-2 py-1">Sign In</Link>
-                <Link href="/signup" className="bg-orange-500 text-white px-4 py-2 rounded-xl font-semibold text-center">Get Started</Link>
-              </>
+              <Link href="/login" className="text-gray-600 font-medium px-2 py-1">Sign In</Link>
             )}
           </motion.div>
         )}

@@ -148,3 +148,46 @@ export async function createQuestion(quizId, questionData) {
 
   return { data: question };
 }
+
+export async function updateQuiz(quizId, formData) {
+  const supabase = await createClient();
+  const title = formData.get('title');
+  const description = formData.get('description');
+  const quizType = formData.get('quiz_type') || 'lesson_quiz';
+  const passingScore = parseInt(formData.get('passing_score') || '60');
+  const timeLimitMinutes = formData.get('time_limit_minutes') ? parseInt(formData.get('time_limit_minutes')) : null;
+  const maxAttempts = parseInt(formData.get('max_attempts') || '3');
+  const lessonId = formData.get('lesson_id') || null;
+  const moduleId = formData.get('module_id') || null;
+  const isPublished = formData.get('is_published') === 'true';
+
+  const { data, error } = await supabase
+    .from('quizzes')
+    .update({
+      title,
+      description,
+      quiz_type: quizType,
+      passing_score: passingScore,
+      time_limit_minutes: timeLimitMinutes,
+      max_attempts: maxAttempts,
+      lesson_id: lessonId,
+      module_id: moduleId,
+      is_published: isPublished,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', quizId)
+    .select()
+    .single();
+
+  if (error) return { error: error.message };
+  revalidatePath('/admin/quizzes');
+  return { data };
+}
+
+export async function deleteQuiz(quizId) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('quizzes').delete().eq('id', quizId);
+  if (error) return { error: error.message };
+  revalidatePath('/admin/quizzes');
+  return { success: true };
+}

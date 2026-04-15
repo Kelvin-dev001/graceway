@@ -34,6 +34,7 @@ export async function middleware(request) {
   const leaderRoutes = ['/leader'];
   const adminRoutes = ['/admin'];
   const authRoutes = ['/login', '/signup', '/reset-password'];
+  const userPortalRoutes = [...protectedRoutes, ...leaderRoutes];
 
   const pathname = request.nextUrl.pathname;
 
@@ -48,24 +49,29 @@ export async function middleware(request) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Redirect authenticated users away from auth pages
-  if (user && authRoutes.some(route => pathname.startsWith(route))) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
-
-  // Check role-based access
-  if (user && (leaderRoutes.some(route => pathname.startsWith(route)) || adminRoutes.some(route => pathname.startsWith(route)))) {
+  if (user) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single();
+    const role = profile?.role || 'student';
 
-    if (adminRoutes.some(route => pathname.startsWith(route)) && profile?.role !== 'admin') {
+    // Redirect authenticated users away from auth pages by role
+    if (authRoutes.some(route => pathname.startsWith(route))) {
+      return NextResponse.redirect(new URL(role === 'admin' ? '/admin' : '/dashboard', request.url));
+    }
+
+    // Enforce strict separation between admin and user portals
+    if (role === 'admin' && userPortalRoutes.some(route => pathname.startsWith(route))) {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
+
+    if (adminRoutes.some(route => pathname.startsWith(route)) && role !== 'admin') {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
-    if (leaderRoutes.some(route => pathname.startsWith(route)) && !['leader', 'admin'].includes(profile?.role)) {
+    if (leaderRoutes.some(route => pathname.startsWith(route)) && !['leader', 'admin'].includes(role)) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }

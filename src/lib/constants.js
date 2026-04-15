@@ -60,7 +60,8 @@ export const ADMIN_NAV_LINKS = [
   { href: '/admin/sections', label: 'Sections' },
   { href: '/admin/lessons', label: 'Lessons' },
   { href: '/admin/quizzes', label: 'Quizzes' },
-  { href: '/admin/users', label: 'Users' },
   { href: '/admin/certificates', label: 'Certificates' },
+  { href: '/admin/users', label: 'Users' },
   { href: '/admin/analytics', label: 'Analytics' },
+  { href: '/admin/logs', label: 'Logs' },
 ];
