@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { signIn } from '@/actions/auth';
@@ -10,7 +9,6 @@ import Input from '@/components/ui/Input';
 import ToastContainer, { useToast } from '@/components/ui/Toast';
 
 export default function LoginForm() {
-  const router = useRouter();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { toasts, toast } = useToast();
@@ -29,7 +27,9 @@ export default function LoginForm() {
       }
       if (result?.success) {
         toast.success('Successfully signed in');
-        router.push(result.redirectTo || '/dashboard');
+        // Hard navigation, not router.push: a client-side transition here can replay a stale
+        // pre-login Router Cache entry (e.g. the footer's /dashboard link), bouncing back to /login.
+        window.location.href = result.redirectTo || '/dashboard';
       }
     } finally {
       setLoading(false);
