@@ -7,12 +7,13 @@ import CertificateDownload from '@/features/certificates/CertificateDownload';
 import ShareButton from '@/components/shared/ShareButton';
 
 export default async function CertificateDetailPage({ params }) {
+  const { certId } = await params;
   const supabase = await createClient();
 
   const { data: certificate } = await supabase
     .from('certificates')
     .select('*, profiles(*), courses(*), modules(*)')
-    .eq('id', params.certId)
+    .eq('id', certId)
     .single();
 
   if (!certificate) redirect('/certificates');

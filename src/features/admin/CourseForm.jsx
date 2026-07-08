@@ -47,6 +47,7 @@ export default function CourseForm({ course, onSuccess }) {
         placeholder="e.g., foundation-of-faith"
         required
       />
+      <Input name="order_index" label="Order" defaultValue={course?.order_index ?? 0} type="number" min="0" />
       <div className="flex flex-col gap-1.5">
         <label className="text-sm font-medium text-gray-700">Description</label>
         <textarea

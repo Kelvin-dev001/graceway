@@ -50,7 +50,7 @@ export default function ModuleList({ modules = [], completedLessons = [] }) {
                     {module.sections?.map((section) => (
                       <div key={section.id}>
                         <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{section.title}</h4>
-                        {section.lessons?.map((lesson) => {
+                        {section.lessons?.map((lesson, lessonIndex) => {
                           const isDone = completedLessons.includes(lesson.id);
                           return (
                             <Link
@@ -59,7 +59,7 @@ export default function ModuleList({ modules = [], completedLessons = [] }) {
                               className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors group"
                             >
                               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 ${isDone ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
-                                {isDone ? '✓' : lesson.order_index + 1}
+                                {isDone ? '✓' : lessonIndex + 1}
                               </div>
                               <span className={`text-sm ${isDone ? 'text-gray-400 line-through' : 'text-gray-700 group-hover:text-navy-500'}`}>
                                 {lesson.title}

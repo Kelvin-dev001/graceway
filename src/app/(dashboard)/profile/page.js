@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { updateProfile } from '@/actions/auth';
+import { getDiscipleshipTree } from '@/actions/leader';
 import { createClient } from '@/lib/supabase/client';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -63,55 +64,34 @@ export default function ProfilePage() {
 
   useEffect(() => {
     async function loadStudents() {
-      if (!profile?.referral_code || activeTab !== 'students') return;
+      if (!user?.id || activeTab !== 'students') return;
       setStudentsLoading(true);
       const { data } = await supabase
         .from('profiles')
         .select('id, name, email, created_at')
-        .eq('referred_by', profile.referral_code)
+        .eq('referred_by', user.id)
         .order('created_at', { ascending: false });
       setStudents(data || []);
       setStudentsLoading(false);
     }
     loadStudents();
-  }, [activeTab, profile?.referral_code, supabase]);
+  }, [activeTab, user?.id, supabase]);
 
   useEffect(() => {
     async function loadTree() {
-      if (!profile?.referral_code || activeTab !== 'tree') return;
+      if (!user?.id || activeTab !== 'tree') return;
       setTreeLoading(true);
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, name, email, referral_code, referred_by');
-
-      if (!data?.length) {
-        setTreeData([]);
-        setTreeLoading(false);
-        return;
-      }
-
-      const byReferral = data.reduce((acc, item) => {
-        if (item.referred_by) {
-          if (!acc[item.referred_by]) acc[item.referred_by] = [];
-          acc[item.referred_by].push(item);
-        }
-        return acc;
-      }, {});
-
-      const rows = [];
-      function walk(node, depth = 0) {
-        rows.push({ ...node, depth });
-        const children = byReferral[node.referral_code] || [];
-        children.forEach((child) => walk(child, depth + 1));
-      }
-
-      const root = data.find((item) => item.id === user?.id);
-      if (root) walk(root);
+      const { data } = await getDiscipleshipTree();
+      const myLevel = profile?.generation_level ?? 0;
+      const rows = (data || []).map((row) => ({
+        ...row,
+        depth: Math.max(0, row.generation_level - myLevel),
+      }));
       setTreeData(rows);
       setTreeLoading(false);
     }
     loadTree();
-  }, [activeTab, profile?.referral_code, supabase, user?.id]);
+  }, [activeTab, user?.id, profile?.generation_level, supabase]);
 
   if (loading) return <div className="text-center py-12 text-gray-400">Loading...</div>;
 

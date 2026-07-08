@@ -105,12 +105,14 @@ export async function createModule(formData) {
   const description = formData.get('description')?.toString().trim() || null;
   const courseId = formData.get('course_id');
   const isPublished = formData.get('is_published') === 'true';
+  const orderIndex = parseInt(formData.get('order_index') ?? '0', 10);
   if (!title) return { error: 'Module title is required.' };
   if (!courseId) return { error: 'Course is required.' };
+  if (Number.isNaN(orderIndex) || orderIndex < 0) return { error: 'Order must be 0 or greater.' };
 
   const { data, error } = await supabase
     .from('modules')
-    .insert({ title, description, course_id: courseId, is_published: isPublished })
+    .insert({ title, description, course_id: courseId, is_published: isPublished, order_index: orderIndex })
     .select()
     .single();
 
@@ -141,8 +143,10 @@ export async function updateModule(moduleId, formData) {
   const description = formData.get('description')?.toString().trim() || null;
   const courseId = formData.get('course_id');
   const isPublished = formData.get('is_published') === 'true';
+  const orderIndex = parseInt(formData.get('order_index') ?? '0', 10);
   if (!title) return { error: 'Module title is required.' };
   if (!courseId) return { error: 'Course is required.' };
+  if (Number.isNaN(orderIndex) || orderIndex < 0) return { error: 'Order must be 0 or greater.' };
 
   const { data, error } = await supabase
     .from('modules')
@@ -151,6 +155,7 @@ export async function updateModule(moduleId, formData) {
       description,
       course_id: courseId,
       is_published: isPublished,
+      order_index: orderIndex,
       updated_at: new Date().toISOString(),
     })
     .eq('id', moduleId)
@@ -234,10 +239,12 @@ export async function createSection(formData) {
   const moduleId = formData.get('module_id');
   if (!title) return { error: 'Section title is required.' };
   if (!moduleId) return { error: 'Module is required.' };
+  const orderIndex = parseInt(formData.get('order_index') ?? '0', 10);
+  if (Number.isNaN(orderIndex) || orderIndex < 0) return { error: 'Order must be 0 or greater.' };
 
   const { data, error } = await supabase
     .from('sections')
-    .insert({ title, description, module_id: moduleId })
+    .insert({ title, description, module_id: moduleId, order_index: orderIndex })
     .select()
     .single();
 
@@ -282,6 +289,8 @@ export async function updateSection(sectionId, formData) {
   const moduleId = formData.get('module_id');
   if (!title) return { error: 'Section title is required.' };
   if (!moduleId) return { error: 'Module is required.' };
+  const orderIndex = parseInt(formData.get('order_index') ?? '0', 10);
+  if (Number.isNaN(orderIndex) || orderIndex < 0) return { error: 'Order must be 0 or greater.' };
 
   const { data, error } = await supabase
     .from('sections')
@@ -289,6 +298,7 @@ export async function updateSection(sectionId, formData) {
       title,
       description,
       module_id: moduleId,
+      order_index: orderIndex,
       updated_at: new Date().toISOString(),
     })
     .eq('id', sectionId)

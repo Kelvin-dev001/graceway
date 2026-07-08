@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import QuizEngine from '@/features/quizzes/QuizEngine';
 
 export default async function QuizPage({ params }) {
+  const { quizId } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -12,7 +13,7 @@ export default async function QuizPage({ params }) {
   const { data: quiz } = await supabase
     .from('quizzes')
     .select('*, questions(*, answers(*))')
-    .eq('id', params.quizId)
+    .eq('id', quizId)
     .single();
 
   if (!quiz) redirect('/dashboard');
@@ -20,7 +21,7 @@ export default async function QuizPage({ params }) {
   const { data: attempts } = await supabase
     .from('quiz_attempts')
     .select('*')
-    .eq('quiz_id', params.quizId)
+    .eq('quiz_id', quizId)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 

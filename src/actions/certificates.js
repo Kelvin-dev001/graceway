@@ -4,51 +4,60 @@ import { createClient } from '@/lib/supabase/server';
 import { generateCertificateNumber } from '@/lib/utils';
 import { sendCertificateEmail } from '@/lib/resend';
 
-export async function issueCertificate(courseId, moduleId, certificateType) {
+export async function issueCertificate(userId, courseId, moduleId, certificateType) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
+
+  if (user.id !== userId) {
+    const { data: callerProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+    if (callerProfile?.role !== 'admin') return { error: 'Unauthorized' };
+  }
 
   const certificateNumber = generateCertificateNumber();
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('name, email')
-    .eq('id', user.id)
+    .eq('id', userId)
     .single();
 
-  const insertData = {
-    user_id: user.id,
-    certificate_type: certificateType,
-    certificate_number: certificateNumber,
-  };
-
-  if (courseId) insertData.course_id = courseId;
-  if (moduleId) insertData.module_id = moduleId;
-
-  const { data: cert, error } = await supabase
-    .from('certificates')
-    .insert(insertData)
-    .select()
-    .single();
+  const { data: cert, error } = await supabase.rpc('issue_certificate', {
+    p_user_id: userId,
+    p_course_id: courseId,
+    p_module_id: moduleId,
+    p_certificate_type: certificateType,
+    p_certificate_number: certificateNumber,
+  });
 
   if (error) return { error: error.message };
 
-  const certUrl = `${process.env.NEXT_PUBLIC_APP_URL}/certificates/${cert.id}`;
-  
-  let resourceName = 'Course';
-  if (courseId) {
-    const { data: course } = await supabase.from('courses').select('title').eq('id', courseId).single();
-    if (course) resourceName = course.title;
+  const wasNewlyIssued = cert.certificate_number === certificateNumber;
+
+  if (wasNewlyIssued) {
+    const certUrl = `${process.env.NEXT_PUBLIC_APP_URL}/certificates/${cert.id}`;
+
+    let resourceName = courseId ? 'Course' : 'Module';
+    if (courseId) {
+      const { data: course } = await supabase.from('courses').select('title').eq('id', courseId).single();
+      if (course) resourceName = course.title;
+    } else if (moduleId) {
+      const { data: module } = await supabase.from('modules').select('title').eq('id', moduleId).single();
+      if (module) resourceName = module.title;
+    }
+
+    try {
+      await sendCertificateEmail(profile.email, profile.name, resourceName, certUrl);
+    } catch (e) {
+      console.error('Certificate email failed:', e);
+    }
   }
 
-  try {
-    await sendCertificateEmail(profile.email, profile.name, resourceName, certUrl);
-  } catch (e) {
-    console.error('Certificate email failed:', e);
-  }
-
-  return { data: cert };
+  return { data: cert, newlyIssued: wasNewlyIssued };
 }
 
 export async function getCertificates() {

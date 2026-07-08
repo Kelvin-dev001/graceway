@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { recomputeCourseCompletion } from '@/actions/courses';
 
 export async function getLesson(lessonId) {
   const supabase = await createClient();
@@ -31,8 +32,32 @@ export async function markLessonComplete(lessonId) {
     });
 
   if (error) return { error: error.message };
+
+  const { data: lessonRow, error: lessonLookupError } = await supabase
+    .from('lessons')
+    .select('module_id, modules(course_id)')
+    .eq('id', lessonId)
+    .single();
+
+  let completion = null;
+  let completionError = null;
+  const courseId = lessonRow?.modules?.course_id;
+
+  if (lessonLookupError) {
+    completionError = lessonLookupError.message;
+  } else if (courseId) {
+    const completionResult = await recomputeCourseCompletion(user.id, courseId);
+    if (completionResult.error) {
+      completionError = completionResult.error;
+    } else {
+      completion = completionResult.data;
+    }
+  }
+
   revalidatePath('/dashboard');
-  return { success: true };
+  return completionError
+    ? { success: true, completion: null, completionError }
+    : { success: true, completion };
 }
 
 export async function getLessonProgress(lessonId) {
@@ -66,6 +91,8 @@ export async function createLesson(formData) {
   if (!slug) return { error: 'Lesson slug is required.' };
   if (!sectionId || !moduleId) return { error: 'Module and section are required.' };
   if (Number.isNaN(durationMinutes) || durationMinutes < 0) return { error: 'Duration must be 0 or greater.' };
+  const orderIndex = parseInt(formData.get('order_index') ?? '0', 10);
+  if (Number.isNaN(orderIndex) || orderIndex < 0) return { error: 'Order must be 0 or greater.' };
 
   const { data, error } = await supabase
     .from('lessons')
@@ -79,6 +106,7 @@ export async function createLesson(formData) {
       module_id: moduleId,
       is_published: isPublished,
       duration_minutes: durationMinutes,
+      order_index: orderIndex,
     })
     .select()
     .single();
@@ -103,6 +131,8 @@ export async function updateLesson(lessonId, formData) {
   if (!slug) return { error: 'Lesson slug is required.' };
   if (!sectionId || !moduleId) return { error: 'Module and section are required.' };
   if (Number.isNaN(durationMinutes) || durationMinutes < 0) return { error: 'Duration must be 0 or greater.' };
+  const orderIndex = parseInt(formData.get('order_index') ?? '0', 10);
+  if (Number.isNaN(orderIndex) || orderIndex < 0) return { error: 'Order must be 0 or greater.' };
 
   const { data, error } = await supabase
     .from('lessons')
@@ -116,6 +146,7 @@ export async function updateLesson(lessonId, formData) {
       module_id: moduleId,
       is_published: isPublished,
       duration_minutes: durationMinutes,
+      order_index: orderIndex,
       updated_at: new Date().toISOString(),
     })
     .eq('id', lessonId)

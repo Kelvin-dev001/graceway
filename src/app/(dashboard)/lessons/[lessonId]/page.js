@@ -7,6 +7,7 @@ import LessonContent from '@/features/learning/LessonContent';
 import ProgressTracker from '@/features/learning/ProgressTracker';
 
 export default async function LessonPage({ params }) {
+  const { lessonId } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
@@ -14,7 +15,7 @@ export default async function LessonPage({ params }) {
   const { data: lesson } = await supabase
     .from('lessons')
     .select('*, sections(*), modules(*, courses(*))')
-    .eq('id', params.lessonId)
+    .eq('id', lessonId)
     .single();
 
   if (!lesson) redirect('/dashboard');
@@ -23,7 +24,7 @@ export default async function LessonPage({ params }) {
     .from('lesson_progress')
     .select('status')
     .eq('user_id', user.id)
-    .eq('lesson_id', params.lessonId)
+    .eq('lesson_id', lessonId)
     .single();
 
   const isCompleted = progress?.status === 'completed';
@@ -31,7 +32,7 @@ export default async function LessonPage({ params }) {
   const { data: quizzes } = await supabase
     .from('quizzes')
     .select('id, title')
-    .eq('lesson_id', params.lessonId)
+    .eq('lesson_id', lessonId)
     .eq('is_published', true);
 
   return (
@@ -45,7 +46,7 @@ export default async function LessonPage({ params }) {
       <LessonContent lesson={lesson} />
 
       <div className="mt-8 pt-8 border-t border-gray-100 flex flex-col gap-4">
-        <ProgressTracker lessonId={params.lessonId} isCompleted={isCompleted} />
+        <ProgressTracker lessonId={lessonId} isCompleted={isCompleted} />
 
         {quizzes && quizzes.length > 0 && (
           <div>

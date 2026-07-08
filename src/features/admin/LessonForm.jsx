@@ -51,6 +51,7 @@ export default function LessonForm({ lesson, modules = [], sections = [], onSucc
       </div>
 
       <Input name="title" label="Lesson Title" defaultValue={lesson?.title} required />
+      <Input name="order_index" label="Order" defaultValue={lesson?.order_index ?? 0} type="number" min="0" />
       <Input name="slug" label="Slug" defaultValue={lesson?.slug} required />
       <Input name="video_url" label="YouTube Video URL" defaultValue={lesson?.video_url} type="url" placeholder="https://youtube.com/..." />
       <Input name="pdf_url" label="PDF URL" defaultValue={lesson?.pdf_url} type="url" placeholder="https://..." />

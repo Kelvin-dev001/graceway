@@ -37,6 +37,7 @@ export default function SectionForm({ section, modules = [], onSuccess }) {
         </select>
       </div>
       <Input name="title" label="Section Title" defaultValue={section?.title} required />
+      <Input name="order_index" label="Order" defaultValue={section?.order_index ?? 0} type="number" min="0" />
       <div className="flex flex-col gap-1.5">
         <label className="text-sm font-medium text-gray-700">Description</label>
         <textarea

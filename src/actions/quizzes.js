@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { recomputeCourseCompletion } from '@/actions/courses';
 
 function validateQuizPayload({ title, quizType, passingScore, maxAttempts, timeLimitMinutes, lessonId, moduleId, courseId }) {
   if (!title) return 'Quiz title is required.';
@@ -87,7 +88,21 @@ export async function submitQuizAttempt(quizId, answers, startedAt) {
     .single();
 
   if (error) return { error: error.message };
-  return { data: attempt, passed, score, totalPoints, percentage };
+
+  let completion = null;
+  let completionError = null;
+  if (passed && quiz.quiz_type === 'course_exam' && quiz.course_id) {
+    const completionResult = await recomputeCourseCompletion(user.id, quiz.course_id);
+    if (completionResult.error) {
+      completionError = completionResult.error;
+    } else {
+      completion = completionResult.data;
+    }
+  }
+
+  return completionError
+    ? { data: attempt, passed, score, totalPoints, percentage, completion: null, completionError }
+    : { data: attempt, passed, score, totalPoints, percentage, completion };
 }
 
 export async function getQuizAttempts(quizId) {
