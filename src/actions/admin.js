@@ -299,7 +299,6 @@ export async function updateSection(sectionId, formData) {
       description,
       module_id: moduleId,
       order_index: orderIndex,
-      updated_at: new Date().toISOString(),
     })
     .eq('id', sectionId)
     .select()

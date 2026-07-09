@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { recomputeCourseCompletion } from '@/actions/courses';
+import { checkQuizSubmitRateLimit } from '@/lib/rate-limit';
 
 async function ensureAdmin() {
   const supabase = await createClient();
@@ -67,6 +68,9 @@ export async function submitQuizAttempt(quizId, answers, startedAt) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
+
+  const rateLimit = await checkQuizSubmitRateLimit(user.id);
+  if (!rateLimit.success) return { error: rateLimit.error };
 
   const { data: quiz, error: quizError } = await supabase
     .from('quizzes')

@@ -1,13 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function ExamTimer({ minutes, onTimeUp }) {
   const [seconds, setSeconds] = useState(minutes * 60);
+  const firedRef = useRef(false);
 
   useEffect(() => {
     if (seconds <= 0) {
-      onTimeUp?.();
+      if (!firedRef.current) {
+        firedRef.current = true;
+        onTimeUp?.();
+      }
       return;
     }
     const interval = setInterval(() => {

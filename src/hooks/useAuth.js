@@ -10,8 +10,11 @@ export function useAuth() {
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
+    let isMounted = true;
+
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      if (!isMounted) return;
       setUser(user);
 
       if (user) {
@@ -20,14 +23,17 @@ export function useAuth() {
           .select('*')
           .eq('id', user.id)
           .single();
+        if (!isMounted) return;
         setProfile(profile);
       }
+      if (!isMounted) return;
       setLoading(false);
     };
 
     getUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
       setUser(session?.user || null);
       if (session?.user) {
         const { data: profile } = await supabase
@@ -35,13 +41,17 @@ export function useAuth() {
           .select('*')
           .eq('id', session.user.id)
           .single();
+        if (!isMounted) return;
         setProfile(profile);
       } else {
         setProfile(null);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [supabase]);
 
   return { user, profile, loading };

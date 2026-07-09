@@ -2,8 +2,13 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { sendWelcomeEmail } from '@/lib/resend';
+import { getClientIp, checkLoginRateLimit, checkSignupRateLimit } from '@/lib/rate-limit';
 
 export async function signUp(formData) {
+  const ip = await getClientIp();
+  const rateLimit = await checkSignupRateLimit(ip);
+  if (!rateLimit.success) return { error: rateLimit.error };
+
   const supabase = await createClient();
   const name = formData.get('name');
   const email = formData.get('email');
@@ -38,6 +43,10 @@ export async function signUp(formData) {
 }
 
 export async function signIn(formData) {
+  const ip = await getClientIp();
+  const rateLimit = await checkLoginRateLimit(ip);
+  if (!rateLimit.success) return { error: rateLimit.error };
+
   const supabase = await createClient();
   const email = formData.get('email');
   const password = formData.get('password');
