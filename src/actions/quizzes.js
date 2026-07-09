@@ -4,6 +4,21 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { recomputeCourseCompletion } from '@/actions/courses';
 
+async function ensureAdmin() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated.' };
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'admin') return { error: 'Unauthorized.' };
+  return { userId: user.id };
+}
+
 function validateQuizPayload({ title, quizType, passingScore, maxAttempts, timeLimitMinutes, lessonId, moduleId, courseId }) {
   if (!title) return 'Quiz title is required.';
   if (Number.isNaN(passingScore) || passingScore < 1 || passingScore > 100) {
@@ -33,29 +48,64 @@ export async function getQuiz(quizId) {
   return { data };
 }
 
+function sanitizeStartedAt(startedAt, timeLimitMinutes) {
+  const parsed = new Date(startedAt);
+  const now = new Date();
+  const maxAgeMs = (timeLimitMinutes ? timeLimitMinutes * 3 : 24 * 60) * 60 * 1000;
+  const clockSkewMs = 5 * 60 * 1000;
+  if (
+    Number.isNaN(parsed.getTime()) ||
+    parsed.getTime() > now.getTime() + clockSkewMs ||
+    parsed.getTime() < now.getTime() - maxAgeMs
+  ) {
+    return now.toISOString();
+  }
+  return parsed.toISOString();
+}
+
 export async function submitQuizAttempt(quizId, answers, startedAt) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
-  // Check attempt count
-  const { data: attempts } = await supabase
-    .from('quiz_attempts')
-    .select('id')
-    .eq('quiz_id', quizId)
-    .eq('user_id', user.id);
-
-  const { data: quiz } = await supabase
+  const { data: quiz, error: quizError } = await supabase
     .from('quizzes')
     .select('*, questions(*, answers(*))')
     .eq('id', quizId)
     .single();
+  if (quizError || !quiz) return { error: 'Quiz not found.' };
 
-  if (attempts && attempts.length >= (quiz?.max_attempts || 3)) {
-    return { error: 'Maximum attempts reached' };
+  if (!quiz.is_published) {
+    return { error: 'This quiz is not available.' };
   }
 
-  // Grade answers
+  let courseId = null;
+  if (quiz.quiz_type === 'course_exam') {
+    courseId = quiz.course_id;
+  } else if (quiz.quiz_type === 'module_exam') {
+    const { data: moduleRow, error: moduleError } = await supabase
+      .from('modules').select('course_id').eq('id', quiz.module_id).single();
+    if (moduleError) return { error: moduleError.message };
+    courseId = moduleRow?.course_id ?? null;
+  } else {
+    const { data: lessonRow, error: lessonError } = await supabase
+      .from('lessons').select('module_id, modules(course_id)').eq('id', quiz.lesson_id).single();
+    if (lessonError) return { error: lessonError.message };
+    courseId = lessonRow?.modules?.course_id ?? null;
+  }
+  if (!courseId) return { error: 'This quiz is not attached to a course.' };
+
+  const { data: enrollment, error: enrollmentError } = await supabase
+    .from('enrollments')
+    .select('id, status')
+    .eq('user_id', user.id)
+    .eq('course_id', courseId)
+    .maybeSingle();
+  if (enrollmentError) return { error: enrollmentError.message };
+  if (!enrollment || !['active', 'completed'].includes(enrollment.status)) {
+    return { error: 'You must be enrolled in this course to take this quiz.' };
+  }
+
   let score = 0;
   let totalPoints = 0;
 
@@ -71,23 +121,22 @@ export async function submitQuizAttempt(quizId, answers, startedAt) {
   const percentage = totalPoints > 0 ? (score / totalPoints) * 100 : 0;
   const passed = percentage >= (quiz.passing_score || 60);
 
-  const { data: attempt, error } = await supabase
-    .from('quiz_attempts')
-    .insert({
-      quiz_id: quizId,
-      user_id: user.id,
-      score,
-      total_points: totalPoints,
-      percentage,
-      passed,
-      answers,
-      started_at: startedAt,
-      completed_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
+  const { data: attempt, error: rpcError } = await supabase.rpc('submit_quiz_attempt', {
+    p_user_id: user.id,
+    p_quiz_id: quizId,
+    p_score: score,
+    p_total_points: totalPoints,
+    p_percentage: percentage,
+    p_passed: passed,
+    p_answers: answers,
+    p_started_at: sanitizeStartedAt(startedAt, quiz.time_limit_minutes),
+  });
 
-  if (error) return { error: error.message };
+  if (rpcError) {
+    if (rpcError.message?.includes('MAX_ATTEMPTS_REACHED')) return { error: 'Maximum attempts reached' };
+    if (rpcError.message?.includes('QUIZ_NOT_FOUND')) return { error: 'Quiz not found.' };
+    return { error: rpcError.message };
+  }
 
   let completion = null;
   let completionError = null;
@@ -122,6 +171,9 @@ export async function getQuizAttempts(quizId) {
 }
 
 export async function createQuiz(formData) {
+  const auth = await ensureAdmin();
+  if (auth.error) return { error: auth.error };
+
   const supabase = await createClient();
   const title = formData.get('title')?.toString().trim();
   const description = formData.get('description')?.toString().trim() || null;
@@ -169,6 +221,9 @@ export async function createQuiz(formData) {
 }
 
 export async function createQuestion(quizId, questionData) {
+  const auth = await ensureAdmin();
+  if (auth.error) return { error: auth.error };
+
   const supabase = await createClient();
   const { question_text, question_type, points, explanation, answers } = questionData;
 
@@ -196,6 +251,9 @@ export async function createQuestion(quizId, questionData) {
 }
 
 export async function updateQuiz(quizId, formData) {
+  const auth = await ensureAdmin();
+  if (auth.error) return { error: auth.error };
+
   const supabase = await createClient();
   const title = formData.get('title')?.toString().trim();
   const description = formData.get('description')?.toString().trim() || null;
@@ -245,6 +303,9 @@ export async function updateQuiz(quizId, formData) {
 }
 
 export async function deleteQuiz(quizId) {
+  const auth = await ensureAdmin();
+  if (auth.error) return { error: auth.error };
+
   const supabase = await createClient();
   const { error } = await supabase.from('quizzes').delete().eq('id', quizId);
   if (error) return { error: error.message };
@@ -253,6 +314,9 @@ export async function deleteQuiz(quizId) {
 }
 
 export async function replaceQuizQuestions(quizId, questions = []) {
+  const auth = await ensureAdmin();
+  if (auth.error) return { error: auth.error };
+
   const supabase = await createClient();
 
   if (!quizId) return { error: 'Quiz ID is required.' };

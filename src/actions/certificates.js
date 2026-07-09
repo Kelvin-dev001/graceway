@@ -77,12 +77,22 @@ export async function getCertificates() {
 
 export async function getCertificate(certId) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('certificates')
-    .select('*, profiles(*), courses(*), modules(*)')
-    .eq('id', certId)
-    .single();
+  const { data: cert, error } = await supabase
+    .rpc('get_public_certificate', { p_certificate_id: certId })
+    .maybeSingle();
 
   if (error) return { error: error.message };
-  return { data };
+  if (!cert) return { data: null };
+
+  return {
+    data: {
+      id: cert.id,
+      certificate_number: cert.certificate_number,
+      issued_at: cert.issued_at,
+      pdf_url: cert.pdf_url,
+      profiles: { name: cert.recipient_name },
+      courses: cert.course_title ? { title: cert.course_title } : null,
+      modules: cert.module_title ? { title: cert.module_title } : null,
+    },
+  };
 }

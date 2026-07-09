@@ -4,6 +4,21 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { recomputeCourseCompletion } from '@/actions/courses';
 
+async function ensureAdmin() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated.' };
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role !== 'admin') return { error: 'Unauthorized.' };
+  return { userId: user.id };
+}
+
 export async function getLesson(lessonId) {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -77,6 +92,9 @@ export async function getLessonProgress(lessonId) {
 }
 
 export async function createLesson(formData) {
+  const auth = await ensureAdmin();
+  if (auth.error) return { error: auth.error };
+
   const supabase = await createClient();
   const title = formData.get('title')?.toString().trim();
   const slug = formData.get('slug')?.toString().trim();
@@ -117,6 +135,9 @@ export async function createLesson(formData) {
 }
 
 export async function updateLesson(lessonId, formData) {
+  const auth = await ensureAdmin();
+  if (auth.error) return { error: auth.error };
+
   const supabase = await createClient();
   const title = formData.get('title')?.toString().trim();
   const slug = formData.get('slug')?.toString().trim();
@@ -159,6 +180,9 @@ export async function updateLesson(lessonId, formData) {
 }
 
 export async function deleteLesson(lessonId) {
+  const auth = await ensureAdmin();
+  if (auth.error) return { error: auth.error };
+
   const supabase = await createClient();
   const { count: quizCount } = await supabase
     .from('quizzes')

@@ -12,6 +12,7 @@ export default function QuizEngine({ quiz, previousAttempts = [] }) {
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [startTime] = useState(new Date().toISOString());
 
   const attemptsLeft = (quiz.max_attempts || 3) - previousAttempts.length;
@@ -23,6 +24,12 @@ export default function QuizEngine({ quiz, previousAttempts = [] }) {
     }
     setLoading(true);
     const res = await submitQuizAttempt(quiz.id, answers, startTime);
+    if (res?.error) {
+      setError(res.error);
+      setLoading(false);
+      return;
+    }
+    setError('');
     setResult(res);
     setSubmitted(true);
     setLoading(false);
@@ -47,6 +54,11 @@ export default function QuizEngine({ quiz, previousAttempts = [] }) {
 
   return (
     <div className="flex flex-col gap-6">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 text-sm">
+          {error}
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-navy-500">{quiz.title}</h2>

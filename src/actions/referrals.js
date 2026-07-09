@@ -33,12 +33,9 @@ export async function getReferralStats() {
 
 export async function validateReferralCode(code) {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, name, referral_code')
-    .eq('referral_code', code)
-    .single();
+  const { data, error } = await supabase.rpc('get_referrer_by_code', { p_code: code });
 
-  if (error || !data) return { valid: false };
-  return { valid: true, referrer: data };
+  const referrer = data?.[0];
+  if (error || !referrer) return { valid: false };
+  return { valid: true, referrer };
 }

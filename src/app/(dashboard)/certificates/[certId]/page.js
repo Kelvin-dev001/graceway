@@ -10,13 +10,21 @@ export default async function CertificateDetailPage({ params }) {
   const { certId } = await params;
   const supabase = await createClient();
 
-  const { data: certificate } = await supabase
-    .from('certificates')
-    .select('*, profiles(*), courses(*), modules(*)')
-    .eq('id', certId)
-    .single();
+  const { data: cert } = await supabase
+    .rpc('get_public_certificate', { p_certificate_id: certId })
+    .maybeSingle();
 
-  if (!certificate) redirect('/certificates');
+  if (!cert) redirect('/certificates');
+
+  const certificate = {
+    id: cert.id,
+    certificate_number: cert.certificate_number,
+    issued_at: cert.issued_at,
+    pdf_url: cert.pdf_url,
+    profiles: { name: cert.recipient_name },
+    courses: cert.course_title ? { title: cert.course_title } : null,
+    modules: cert.module_title ? { title: cert.module_title } : null,
+  };
 
   const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL}/certificates/${certificate.id}`;
 
