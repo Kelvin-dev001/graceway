@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 
-function JoinRedirect({ searchParams }) {
-  const ref = searchParams.ref;
+async function JoinRedirect({ searchParams }) {
+  const { ref } = await searchParams;
   if (ref) {
     redirect(`/signup?ref=${ref}`);
   }

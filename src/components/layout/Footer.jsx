@@ -16,7 +16,7 @@ export default function Footer() {
             </p>
           </div>
           <div>
-            <h4 className="font-semibold mb-4 text-navy-100">Platform</h4>
+            <h3 className="font-semibold mb-4 text-navy-100">Platform</h3>
             <ul className="flex flex-col gap-2 text-sm text-navy-200">
               <li><Link href="/courses" className="hover:text-white transition-colors">Courses</Link></li>
               <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
@@ -24,7 +24,7 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4 text-navy-100">Account</h4>
+            <h3 className="font-semibold mb-4 text-navy-100">Account</h3>
             <ul className="flex flex-col gap-2 text-sm text-navy-200">
               <li><Link href="/signup" className="hover:text-white transition-colors">Sign Up</Link></li>
             </ul>
